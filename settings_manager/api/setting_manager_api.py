@@ -3,6 +3,9 @@ from settings_manager.core.permission_group import PermissionGroup
 from settings_manager.core.settings_type import SettingsType
 from settings_manager.core.settings import Settings
 from settings_manager.core.settings_user import SettingsUser
+from settings_manager.core.settings_user import Scope
+
+from settings_manager.database.api import SettingsDatabaseAPI
 
 from settings_manager.constants.typing import SCOPE_TYPE
 from settings_manager.constants.typing import SCOPE_LIST_TYPE
@@ -23,21 +26,34 @@ class SettingsManagerAPI:
         self._script_name = script_name
         self._password = password
 
+        self._database_api = SettingsDatabaseAPI(instance)
+
     """
     CRUD functions to directly read and update settings data
     """
 
-    def read(self, settings_name: str, scope: SCOPE_TYPE = None) -> SettingsType:
-        #TODO: To replace with real value
+    def read(self, settings_name: SETTINGS_TYPE, scope: SCOPE_TYPE = None) -> SettingsType:
+
+        value = self._database_api.read(Settings, str(settings_name), [Scope, str(scope)])
+
         return SettingsType()
 
     def update(self, settings: SETTINGS_TYPE, value: SettingsType, scope: SCOPE_TYPE = None) -> bool:
-        return True
 
-    def delete(self, settings: SETTINGS_TYPE, value: SettingsType, scope: SCOPE_TYPE = None) -> bool:
+        status = self._database_api.update(Settings, str(settings), [Scope, str(scope)], value)
+
+        return status
+
+    def delete(self, settings: SETTINGS_TYPE, scope: SCOPE_TYPE = None) -> bool:
+
+        status = self._database_api.delete(Settings, str(settings), [Scope, str(scope)])
+
         return True
 
     def create(self, settings: SETTINGS_TYPE, value: SettingsType, scope: SCOPE_TYPE = None) -> bool:
+
+        create = self._database_api.create(Settings, str(settings), value, [Scope, str(scope)])
+
         return True
 
     """
