@@ -9,6 +9,8 @@ class PermissionGroup:
         """
 
         self._name = name
+        self._users_list = None
+        self._scripts_list = None
 
     def add_entity(self, user_name=None, script_name=None):
         return

@@ -29,7 +29,7 @@ class SettingsManagerAPI:
     def add_scope(self, scope_name, overridden_scopes=None):
         return
 
-    def remove_scope(self, scope_name):
+    def delete_scope(self, scope_name):
         return
 
     def add_settings(self, settings_name, settings_type, scopes=None, permissions_groups=None):
@@ -41,3 +41,23 @@ class SettingsManagerAPI:
     def delete_settings(self, settings_name):
         return
 
+    def add_permission_group(self, permission_group_name, users=None, scripts=None):
+        return
+
+    def update_permission_group(self, permission_group_name, users=None, scripts=None):
+        return
+
+    def delete_permission_group(self, permission_group_name, users=None, scripts=None):
+        return
+
+    def add_user(self, user_name, permission_group=None):
+        return
+
+    def delete_user(self, user_name):
+        return
+
+    def add_script(self, script_name, permission_group=None):
+        return
+
+    def delete_script(self, script_name):
+        return
