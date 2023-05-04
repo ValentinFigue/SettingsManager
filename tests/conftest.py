@@ -1,5 +1,7 @@
 import pytest
 
+from settings_manager.implementation.mock_database import MockDatabase
+
 @pytest.fixture
-def settings_database_instance():
-    return "test_instance"
+def settings_mock_database():
+    return MockDatabase()
