@@ -1,6 +1,7 @@
 from settings_manager.database.settings_database import SettingsDatabase
 
 from settings_manager.core.settings import Settings
+from settings_manager.core.scope import Scope
 
 
 class SettingsDatabaseAPI:
@@ -17,10 +18,19 @@ class SettingsDatabaseAPI:
 
         return value
 
-    def create(self, entity_type, entity_name, entity_value, **extra_fields):
+    def create(self, entity_type, entity_name, **extra_fields):
 
         if entity_type is Settings:
-            value = self._database.create_settings(entity_name, entity_value, **extra_fields)
+            if 'scope' in extra_fields and 'entity_value' in extra_fields:
+                value = self._database.create_settings(entity_name, entity_value=extra_fields['entity_value'],
+                                                       scope=extra_fields['scope'])
+            else:
+                raise ValueError('Entity value and scope inputs must be sets')
+        elif entity_type is Scope:
+            if 'overridden_scopes' in extra_fields:
+                value = self._database.create_scope(entity_name, overridden_scopes=extra_fields['overridden_scopes'])
+            else:
+                raise ValueError('overriden_scopes input must be sets')
 
         return value
 

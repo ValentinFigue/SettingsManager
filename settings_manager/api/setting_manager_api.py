@@ -3,6 +3,7 @@ from settings_manager.core.permission_group import PermissionGroup
 from settings_manager.core.settings_type import SettingsType
 from settings_manager.core.settings import Settings
 from settings_manager.core.settings_user import SettingsUser
+from settings_manager.core.scope import Scope
 
 from settings_manager.database.settings_database_api import SettingsDatabaseAPI
 from settings_manager.database.settings_database_api import SettingsDatabase
@@ -68,7 +69,10 @@ class SettingsManagerAPI:
     """
 
     def add_scope_to_database(self, scope_name: str, overridden_scopes: SCOPE_LIST_TYPE = None) -> bool:
-        return True
+
+        status = self._database_api.create(Scope, str(scope_name), overridden_scopes=overridden_scopes)
+
+        return status
 
     def delete_scope_from_database(self, scope_name: str) -> bool:
         return True

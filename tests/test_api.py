@@ -18,6 +18,7 @@ def test_api_initialization(settings_mock_database):
     else:
         assert False
 
+
 @pytest.mark.parametrize('settings', ['test_settings', Settings('test_settings')])
 def test_api_read_settings(settings_mock_database, settings):
     settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
@@ -28,4 +29,10 @@ def test_api_read_settings(settings_mock_database, settings):
     assert (settings_manager_api.read_settings(settings) == 4)
     assert (settings_manager_api.delete_settings(settings))
     assert (settings_manager_api.read_settings(settings) is None)
+
+
+def test_api_schema_modifications(settings_mock_database):
+    settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
+    assert (settings_manager_api.add_scope_to_database('Project', overridden_scopes=None))
+
 
