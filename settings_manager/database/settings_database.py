@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from settings_manager.core.settings_type import SettingsType
+
 
 class SettingsDatabase(ABC):
 
@@ -7,27 +9,19 @@ class SettingsDatabase(ABC):
     def connect(self, identifier: str, password: str) -> bool:
         return True
 
-    """
     @abstractmethod
-    def read_settings(self, settings_name):
-        value = None
-        return value
+    def read_settings(self, settings_name: str, **filters) -> SettingsType:
+        return
 
     @abstractmethod
-    def read(self, entity_type, entity_name, **filters):
-        value = None
-        return value
+    def create_settings(self, settings_name: str, entity_value: SettingsType, **extra_fields) -> bool:
+        return
 
     @abstractmethod
-    def create(self, entity_type, entity_name, entity_value, **extra_fields):
-        return True
+    def update_settings(self, settings_name: str, entity_value: SettingsType, **filters) -> bool:
+        return
 
     @abstractmethod
-    def update(self, entity_type, entity_name, entity_value, **filters):
-        return True
+    def delete_settings(self, settings_name: str, **filters) -> bool:
+        return
 
-    @abstractmethod
-    def delete(self, entity_type, entity_name, **filters):
-        return True
-    
-    """
