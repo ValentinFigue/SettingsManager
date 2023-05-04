@@ -3,6 +3,7 @@ import pytest
 
 # Internal Import
 from settings_manager.api.setting_manager_api import SettingsManagerAPI
+from settings_manager.core.settings import Settings
 
 
 #### INITIALIZATION ###
@@ -17,14 +18,14 @@ def test_api_initialization(settings_mock_database):
     else:
         assert False
 
-
-def test_api_read_settings(settings_mock_database):
+@pytest.mark.parametrize('settings', ['test_settings', Settings('test_settings')])
+def test_api_read_settings(settings_mock_database, settings):
     settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
-    assert (settings_manager_api.read_settings('test_settings') is None)
-    assert (settings_manager_api.update_settings('test_settings', 8))
-    assert (settings_manager_api.read_settings('test_settings') == 8)
-    assert (settings_manager_api.update_settings('test_settings', 4))
-    assert (settings_manager_api.read_settings('test_settings') == 4)
-    assert (settings_manager_api.delete_settings('test_settings'))
-    assert (settings_manager_api.read_settings('test_settings') is None)
+    assert (settings_manager_api.read_settings(settings) is None)
+    assert (settings_manager_api.update_settings(settings, 8))
+    assert (settings_manager_api.read_settings(settings) == 8)
+    assert (settings_manager_api.update_settings(settings, 4))
+    assert (settings_manager_api.read_settings(settings) == 4)
+    assert (settings_manager_api.delete_settings(settings))
+    assert (settings_manager_api.read_settings(settings) is None)
 
