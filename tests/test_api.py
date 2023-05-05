@@ -34,13 +34,13 @@ def test_api_read_settings(settings_mock_database, settings):
 def test_api_schema_modifications_scope(settings_mock_database):
     settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
     # Scope Creation
-    assert (settings_manager_api.add_scope_to_database('Project', overridden_scopes=None))
-    assert (settings_manager_api.add_scope_to_database('Sequence', overridden_scopes='Project'))
-    assert (settings_manager_api.add_scope_to_database('Shot', overridden_scopes=['Sequence', Scope('Project')]))
-    assert (settings_mock_database.get_scopes_overridden_by('Sequence') == ['Project'])
-    assert (len(settings_mock_database.get_scopes_overridden_by('Shot')) == 2)
+    assert (settings_manager_api.add_scope_to_database('Project'))
+    assert (settings_manager_api.add_scope_to_database('Shot', override=Scope('Project')))
+    assert (settings_manager_api.add_scope_to_database('Sequence', override=Scope('Project'), overridden_by='Shot'))
+    assert (settings_mock_database.get_scope_overridden_by('Sequence') == 'Project')
+    assert (settings_mock_database.get_scope_overridden_by('Shot') == 'Sequence')
     # Scope Deletion
-    assert( settings_manager_api.delete_scope_from_database('Sequence') )
-    assert (settings_mock_database.get_scopes_overridden_by('Shot') == ['Project'])
+    assert (settings_manager_api.delete_scope_from_database('Sequence'))
+    assert (settings_mock_database.get_scope_overridden_by('Shot') == 'Project')
 
 

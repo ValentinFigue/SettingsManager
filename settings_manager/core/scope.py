@@ -7,3 +7,7 @@ class Scope:
     def __str__(self) -> str:
 
         return self._scope_name
+
+    def __repr__(self) -> str:
+
+        return self._scope_name

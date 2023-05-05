@@ -35,7 +35,7 @@ class MockDatabase(SettingsDatabase):
         return True
 
     def register_scope(self, scope_name: str) -> bool:
-        self._scope_hierarchy[scope_name] = []
+        self._scope_hierarchy[scope_name] = None
         return True
 
     def unregister_scope(self, scope_name: str) -> bool:
@@ -49,25 +49,29 @@ class MockDatabase(SettingsDatabase):
 
     def parent_scope(self, scope_name: str, overridden_scope: str) -> bool:
 
-        if scope_name not in self._scope_hierarchy[overridden_scope]:
-            self._scope_hierarchy[overridden_scope].append(scope_name)
+        if self._scope_hierarchy[overridden_scope] and self._scope_hierarchy[overridden_scope] != scope_name:
+            return False
+        else:
+            self._scope_hierarchy[overridden_scope] = scope_name
+
         return True
 
     def unparent_scope(self, scope_name: str, overridden_scope: str) -> bool:
 
-        if scope_name in self._scope_hierarchy[overridden_scope]:
-            self._scope_hierarchy[overridden_scope].remove(scope_name)
+        if self._scope_hierarchy[overridden_scope] and self._scope_hierarchy[overridden_scope] != scope_name:
+            return False
+        else:
+            self._scope_hierarchy[overridden_scope] = None
+
         return True
 
-    def get_scopes_overridden_by(self, scope_name: str) -> SCOPE_LIST_TYPE:
+    def get_scope_overridden_by(self, scope_name: str) -> SCOPE_LIST_TYPE:
 
-        overriden_scopes = set()
         for scope in self._scope_hierarchy.keys():
-            if scope_name in self._scope_hierarchy.get(scope):
-                overriden_scopes.add(scope)
+            if scope_name == self._scope_hierarchy.get(scope):
+                return scope
+        return
 
-        return list(overriden_scopes)
+    def get_scope_that_overrides(self, scope_name: str) -> SCOPE_LIST_TYPE:
 
-    def get_scopes_that_overrides(self, scope_name: str) -> SCOPE_LIST_TYPE:
-
-        return self._scope_hierarchy.get(scope_name, None)
+        return self._scope_hierarchy.get(scope_name)

@@ -68,13 +68,19 @@ class SettingsManagerAPI:
     CRUD functions to directly update settings database schema
     """
 
-    def add_scope_to_database(self, scope_name: SCOPE_TYPE, overridden_scopes: SCOPE_LIST_TYPE = None) -> bool:
+    def add_scope_to_database(self, scope_name: SCOPE_TYPE, override: SCOPE_TYPE = None,
+                              overridden_by: SCOPE_TYPE = None, replace_override: bool = False) -> bool:
 
-        # Convert scopes to override to string only
-        if overridden_scopes and not isinstance(overridden_scopes, (str, Scope)):
-            overridden_scopes = [str(overridden_scope) for overridden_scope in overridden_scopes]
+        # Convert to string scope inputs
+        if isinstance(scope_name, Scope):
+            scope_name = str(scope_name)
+        if isinstance(override, Scope):
+            override = str(override)
+        if isinstance(overridden_by, Scope):
+            overridden_by = str(overridden_by)
 
-        status = self._database_api.create(Scope, str(scope_name), overridden_scopes=overridden_scopes)
+        status = self._database_api.create(Scope, scope_name, override=override,
+                                           overridden_by=overridden_by, replace_override=replace_override)
 
         return status
 

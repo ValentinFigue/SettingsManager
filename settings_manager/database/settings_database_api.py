@@ -27,8 +27,11 @@ class SettingsDatabaseAPI:
             else:
                 raise ValueError('Entity value and scope inputs must be sets')
         elif entity_type is Scope:
-            if 'overridden_scopes' in extra_fields:
-                value = self._database.create_scope(entity_name, overridden_scopes=extra_fields['overridden_scopes'])
+            if 'override' in extra_fields and 'overridden_by' in extra_fields and 'replace_override' in extra_fields:
+                value = self._database.create_scope(entity_name,
+                                                    override=extra_fields['override'],
+                                                    overridden_by=extra_fields['overridden_by'],
+                                                    replace_override=extra_fields['replace_override'])
             else:
                 raise ValueError('overriden_scopes input must be sets')
 

@@ -54,18 +54,19 @@ class SettingsDatabase(ABC):
         return
 
     @abstractmethod
-    def get_scopes_overridden_by(self, scope_name: str) -> SCOPE_LIST_TYPE:
+    def get_scope_overridden_by(self, scope_name: str) -> SCOPE_TYPE:
         return
 
     @abstractmethod
-    def get_scopes_that_overrides(self, scope_name: str) -> SCOPE_LIST_TYPE:
+    def get_scope_that_overrides(self, scope_name: str) -> SCOPE_TYPE:
         return
 
     """
     More complex functions that can be accomplished by manipulating the different operations above
     """
 
-    def create_scope(self, scope_name: str, overridden_scopes: SCOPE_LIST_TYPE) -> bool:
+    def create_scope(self, scope_name: str, override: SCOPE_TYPE, overridden_by: SCOPE_TYPE,
+                     replace_override=False) -> bool:
 
         # Check the existence of the scope
         if self.check_scope_existence(scope_name):
@@ -74,13 +75,45 @@ class SettingsDatabase(ABC):
         status_creation = self.register_scope(scope_name)
         if not status_creation:
             return False
-        # Loop over all the scopes that will be overriden
-        if overridden_scopes:
-            if isinstance(overridden_scopes, (str, Scope)):
-                self.parent_scope(scope_name, overridden_scopes)
+        # Definition of the new overriden chain
+        # In case we need to define a new scope that overrides
+        if override is not None:
+            print(type(override))
+            # Get the scope that already overrides
+            scope_already_overriding = self.get_scope_that_overrides(override)
+            print(override)
+            # Easy case
+            if not scope_already_overriding:
+                print(override)
+                self.parent_scope(scope_name, override)
+            # Check if it's the one that will override our new scope
+            elif scope_already_overriding == overridden_by:
+                # We can create a new chain with no conflict
+                self.unparent_scope(scope_already_overriding, override)
+                self.parent_scope(scope_name, override)
+                self.parent_scope(overridden_by, scope_name)
+                return True
             else:
-                for overridden_scope in overridden_scopes:
-                    self.parent_scope(scope_name, overridden_scope)
+                # In case of force mode
+                if replace_override:
+                    self.unparent_scope(scope_already_overriding, override)
+                    self.parent_scope(scope_name, override)
+                else:
+                    return False
+        # In case we need to define a new scope that is overriden
+        if overridden_by is not None:
+            # Get the scope that already overrides
+            scope_already_overridden = self.get_scope_overridden_by(overridden_by)
+            # Easy case
+            if not scope_already_overridden:
+                self.parent_scope(overridden_by, scope_name)
+            elif scope_already_overridden != overridden_by:
+                if replace_override:
+                    self.unparent_scope(overridden_by, scope_already_overridden)
+                    self.parent_scope(overridden_by, scope_name)
+                else:
+                    return False
+
         return True
 
     def delete_scope(self, scope_name: str) -> bool:
@@ -89,15 +122,19 @@ class SettingsDatabase(ABC):
         if not self.check_scope_existence(scope_name):
             return False
 
-        # Loop over all the scopes that are overriden the scope that will be deleted
-        for scope in self.get_scopes_overridden_by(scope_name):
-            if not self.unparent_scope(scope_name, scope):
-                return False
-        # Loop over all the scopes that overrides the scope that will be deleted
-        for scope in self.get_scopes_that_overrides(scope_name):
-            if not self.unparent_scope(scope, scope_name):
-                return False
+        # Check if the scope is not a leaf
+        scope_that_overrides = self.get_scope_that_overrides(scope_name)
+        # Check if the scope is overridden
+        scope_overridden_by = self.get_scope_overridden_by(scope_name)
+        if scope_that_overrides and scope_overridden_by:
+            # First unparent
+            self.unparent_scope(scope_name, scope_overridden_by)
+            self.unparent_scope(scope_that_overrides, scope_name)
+            # Then parent the two remaining ones
+            self.parent_scope(scope_that_overrides, scope_overridden_by)
 
+
+        # Unregister of the scope
         self.unregister_scope(scope_name)
 
         return True
