@@ -38,11 +38,27 @@ class SettingsDatabase(ABC):
         return
 
     @abstractmethod
+    def unregister_scope(self, scope_name: str) -> bool:
+        return
+
+    @abstractmethod
     def check_scope_existence(self, scope_name: str) -> bool:
         return
 
     @abstractmethod
     def parent_scope(self, scope_name: str, overridden_scope: str) -> bool:
+        return
+
+    @abstractmethod
+    def unparent_scope(self, scope_name: str, overridden_scope: str) -> bool:
+        return
+
+    @abstractmethod
+    def get_scopes_overridden_by(self, scope_name: str) -> SCOPE_LIST_TYPE:
+        return
+
+    @abstractmethod
+    def get_scopes_that_overrides(self, scope_name: str) -> SCOPE_LIST_TYPE:
         return
 
     """
@@ -67,3 +83,21 @@ class SettingsDatabase(ABC):
                     self.parent_scope(scope_name, overridden_scope)
         return True
 
+    def delete_scope(self, scope_name: str) -> bool:
+
+        # Check the existence of the scope
+        if not self.check_scope_existence(scope_name):
+            return False
+
+        # Loop over all the scopes that are overriden the scope that will be deleted
+        for scope in self.get_scopes_overridden_by(scope_name):
+            if not self.unparent_scope(scope_name, scope):
+                return False
+        # Loop over all the scopes that overrides the scope that will be deleted
+        for scope in self.get_scopes_that_overrides(scope_name):
+            if not self.unparent_scope(scope, scope_name):
+                return False
+
+        self.unregister_scope(scope_name)
+
+        return True

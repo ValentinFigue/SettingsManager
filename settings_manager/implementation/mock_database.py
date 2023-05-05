@@ -38,11 +38,36 @@ class MockDatabase(SettingsDatabase):
         self._scope_hierarchy[scope_name] = []
         return True
 
+    def unregister_scope(self, scope_name: str) -> bool:
+
+        del self._scope_hierarchy[scope_name]
+
+        return True
+
     def check_scope_existence(self, scope_name: str) -> bool:
         return scope_name in self._scope_hierarchy.keys()
 
     def parent_scope(self, scope_name: str, overridden_scope: str) -> bool:
 
-        if not scope_name in self._scope_hierarchy[overridden_scope]:
+        if scope_name not in self._scope_hierarchy[overridden_scope]:
             self._scope_hierarchy[overridden_scope].append(scope_name)
         return True
+
+    def unparent_scope(self, scope_name: str, overridden_scope: str) -> bool:
+
+        if scope_name in self._scope_hierarchy[overridden_scope]:
+            self._scope_hierarchy[overridden_scope].remove(scope_name)
+        return True
+
+    def get_scopes_overridden_by(self, scope_name: str) -> SCOPE_LIST_TYPE:
+
+        overriden_scopes = set()
+        for scope in self._scope_hierarchy.keys():
+            if scope_name in self._scope_hierarchy.get(scope):
+                overriden_scopes.add(scope)
+
+        return list(overriden_scopes)
+
+    def get_scopes_that_overrides(self, scope_name: str) -> SCOPE_LIST_TYPE:
+
+        return self._scope_hierarchy.get(scope_name, None)

@@ -68,7 +68,7 @@ class SettingsManagerAPI:
     CRUD functions to directly update settings database schema
     """
 
-    def add_scope_to_database(self, scope_name: str, overridden_scopes: SCOPE_LIST_TYPE = None) -> bool:
+    def add_scope_to_database(self, scope_name: SCOPE_TYPE, overridden_scopes: SCOPE_LIST_TYPE = None) -> bool:
 
         # Convert scopes to override to string only
         if overridden_scopes and not isinstance(overridden_scopes, (str, Scope)):
@@ -78,8 +78,11 @@ class SettingsManagerAPI:
 
         return status
 
-    def delete_scope_from_database(self, scope_name: str) -> bool:
-        return True
+    def delete_scope_from_database(self, scope_name: SCOPE_TYPE) -> bool:
+
+        status = self._database_api.delete(Scope, str(scope_name))
+
+        return status
 
     def add_settings_to_database(self, settings_name: str, settings_type: SettingsType, scopes: SCOPE_LIST_TYPE = None,
                      permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> Settings:

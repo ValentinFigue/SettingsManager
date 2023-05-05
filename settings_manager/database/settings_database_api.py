@@ -45,5 +45,7 @@ class SettingsDatabaseAPI:
 
         if entity_type is Settings:
             value = self._database.delete_settings(entity_name, **filters)
+        elif entity_type is Scope:
+            value = self._database.delete_scope(entity_name)
 
         return value
