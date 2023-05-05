@@ -91,6 +91,17 @@ class SettingsDatabase(ABC):
     def check_schema_settings_existence(self, settings_name: str) -> bool:
         return
 
+    @abstractmethod
+    def check_scope_existence(self, scope_name: str, schema_scope_name: str) -> bool:
+        return
+
+    @abstractmethod
+    def register_scope(self, scope_name: str, schema_scope_name: str) -> bool:
+        return
+
+    @abstractmethod
+    def unregister_scope(self, scope_name: str, schema_scope_name: str) -> bool:
+        return
 
     """
     More complex functions that can be accomplished by manipulating the different operations above
@@ -235,5 +246,33 @@ class SettingsDatabase(ABC):
 
         # TODO: Do the same with the permissions
         self.reset_schema_settings(settings_name, schema_settings_type, schema_scopes, permissions_groups)
+
+        return True
+
+    def create_scope(self, scope_name: str, schema_scope: str) -> bool:
+
+        # Check existence of the schema scope
+        if not self.check_schema_scope_existence(schema_scope):
+            return False
+
+        # Check existence of the scope
+        if self.check_scope_existence(scope_name, schema_scope):
+            return False
+
+        self.register_scope(scope_name, schema_scope)
+
+        return True
+
+    def delete_scope(self, scope_name: str, schema_scope: str) -> bool:
+
+        # Check existence of the schema scope
+        if not self.check_schema_scope_existence(schema_scope):
+            return False
+
+        # Check existence of the scope
+        if not self.check_scope_existence(scope_name, schema_scope):
+            return False
+
+        self.unregister_scope(scope_name, schema_scope)
 
         return True

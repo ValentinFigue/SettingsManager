@@ -11,6 +11,7 @@ class MockDatabase(SettingsDatabase):
         self._scope_hierarchy = {}
         self._settings_type = {}
         self._settings_schema = {}
+        self._scopes = {}
 
     def connect(self, identifier: str, password: str) -> bool:
         return True
@@ -38,11 +39,13 @@ class MockDatabase(SettingsDatabase):
 
     def register_schema_scope(self, scope_name: str) -> bool:
         self._scope_hierarchy[scope_name] = None
+        self._scopes[scope_name] = []
         return True
 
     def unregister_schema_scope(self, scope_name: str) -> bool:
 
         del self._scope_hierarchy[scope_name]
+        del self._scopes[scope_name]
 
         return True
 
@@ -123,5 +126,21 @@ class MockDatabase(SettingsDatabase):
         self._settings_schema['type'] = schema_settings_type
         self._settings_schema['scopes'] = schema_scopes
         self._settings_schema['permissions'] = permissions_groups
+
+        return True
+
+    def check_scope_existence(self, scope_name: str, schema_scope_name: str) -> bool:
+
+        return scope_name in self._scopes[schema_scope_name]
+
+    def register_scope(self, scope_name: str, schema_scope_name: str) -> bool:
+
+        self._scopes[schema_scope_name].append(scope_name)
+
+        return True
+
+    def unregister_scope(self, scope_name: str, schema_scope_name: str) -> bool:
+
+        self._scopes[schema_scope_name].remove(scope_name)
 
         return True

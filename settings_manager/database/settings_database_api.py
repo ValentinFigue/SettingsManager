@@ -4,6 +4,7 @@ from settings_manager.core.settings import Settings
 from settings_manager.core.schema_scope import SchemaScope
 from settings_manager.core.schema_settings_type import SchemaSettingsType
 from settings_manager.core.schema_settings import SchemaSettings
+from settings_manager.core.scope import Scope
 
 class SettingsDatabaseAPI:
 
@@ -51,6 +52,11 @@ class SettingsDatabaseAPI:
                                                               )
             else:
                 raise ValueError('settings_type input must be set')
+        elif entity_type is Scope:
+            if 'schema_scope' in extra_fields:
+                value = self._database.create_scope(entity_name, schema_scope=extra_fields['schema_scope'])
+            else:
+                raise ValueError('settings_type input must be set')
 
         return value
 
@@ -76,15 +82,20 @@ class SettingsDatabaseAPI:
 
         return value
 
-    def delete(self, entity_type, entity_name, **filters):
+    def delete(self, entity_type, entity_name, **extra_fields):
 
         if entity_type is Settings:
-            value = self._database.delete_settings(entity_name, **filters)
+            value = self._database.delete_settings(entity_name, **extra_fields)
         elif entity_type is SchemaScope:
             value = self._database.delete_schema_scope(entity_name)
         elif entity_type is SchemaSettingsType:
             value = self._database.delete_schema_settings_type(entity_name)
         elif entity_type is SchemaSettings:
             value = self._database.delete_schema_settings(entity_name)
+        elif entity_type is Scope:
+            if 'schema_scope' in extra_fields:
+                value = self._database.delete_scope(entity_name, schema_scope=extra_fields['schema_scope'])
+            else:
+                raise ValueError('schema scope input must be set')
 
         return value

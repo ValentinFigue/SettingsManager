@@ -43,6 +43,7 @@ def test_api_schema_modifications_scope(settings_mock_database):
     assert (settings_manager_api.delete_schema_scope_from_database('Sequence'))
     assert (settings_mock_database.get_schema_scope_overridden_by('Shot') == 'Project')
 
+
 def test_api_schema_modifications_settings_type(settings_mock_database):
     settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
     # Settings Type Creation
@@ -53,6 +54,7 @@ def test_api_schema_modifications_settings_type(settings_mock_database):
     # Settings Type Deletion
     assert (settings_manager_api.delete_schema_settings_type_from_database('Int'))
     assert (not settings_mock_database.check_schema_settings_type_existence('Int'))
+
 
 def test_api_schema_modifications_settings(settings_mock_database):
     settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
@@ -72,4 +74,18 @@ def test_api_schema_modifications_settings(settings_mock_database):
     assert (settings_manager_api.delete_schema_settings_from_database('Name'))
     assert (not settings_mock_database.check_schema_settings_existence('Name'))
 
+
+def test_api_scope_modifications(settings_mock_database):
+    settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
+    # Setup Database
+    settings_manager_api.add_schema_scope_to_database('Project')
+    settings_manager_api.add_schema_scope_to_database('Shot', override=SchemaScope('Project'))
+    settings_manager_api.add_schema_scope_to_database('Sequence', override=SchemaScope('Project'), overridden_by='Shot')
+    # Settings Creation
+    assert (settings_manager_api.create_scope('test_project', 'Project'))
+    assert (settings_manager_api.create_scope('test_shot', SchemaScope('Shot')))
+    assert (not settings_manager_api.create_scope('test_project', 'Wrong scope'))
+    # Settings Deletion
+    assert (settings_manager_api.delete_scope('test_project', 'Project'))
+    assert (not settings_manager_api.delete_scope('test_project', 'Sequence'))
 

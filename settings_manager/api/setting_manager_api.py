@@ -7,13 +7,13 @@ from settings_manager.core.settings import Settings
 from settings_manager.core.settings_user import SettingsUser
 from settings_manager.core.schema_scope import SchemaScope
 from settings_manager.core.schema_settings import SchemaSettings
+from settings_manager.core.scope import Scope
 
 from settings_manager.database.settings_database_api import SettingsDatabaseAPI
 from settings_manager.database.settings_database_api import SettingsDatabase
 
 from settings_manager.constants.typing import SCOPE_TYPE
 from settings_manager.constants.typing import SCHEMA_SCOPE_TYPE
-from settings_manager.constants.typing import SCOPE_LIST_TYPE
 from settings_manager.constants.typing import SETTINGS_TYPE
 from settings_manager.constants.typing import PERMISSION_GROUP_LIST_TYPE
 from settings_manager.constants.typing import USER_LIST_TYPE
@@ -24,6 +24,7 @@ from settings_manager.constants.typing import PERMISSION_GROUP_TYPE
 from settings_manager.constants.typing import SCHEMA_SCOPE_LIST_TYPE
 from settings_manager.constants.typing import SCHEMA_SETTINGSTYPE_TYPE
 from settings_manager.constants.typing import SCHEMA_SETTINGS_TYPE
+
 
 class SettingsManagerAPI:
     def __init__(self, settings_database: SettingsDatabase, username: str = None, script_name: str = None,
@@ -67,6 +68,24 @@ class SettingsManagerAPI:
     def create_settings(self, settings: SETTINGS_TYPE, value: SchemaSettingsType, scope: SCOPE_TYPE = None) -> bool:
 
         status = self._database_api.create(Settings, str(settings), entity_value=value, scope=scope)
+
+        return status
+
+    def create_scope(self, scope_name: str, schema_scope: SCHEMA_SCOPE_TYPE) -> bool:
+
+        # Convert inputs to string
+        schema_scope = str(schema_scope)
+        # Call database API
+        status = self._database_api.create(Scope, scope_name, schema_scope=schema_scope)
+
+        return status
+
+    def delete_scope(self, scope_name: str, schema_scope: SCHEMA_SCOPE_TYPE) -> bool:
+
+        # Convert inputs to string
+        schema_scope = str(schema_scope)
+        # Call database API
+        status = self._database_api.delete(Scope, scope_name, schema_scope=schema_scope)
 
         return status
 
