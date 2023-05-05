@@ -60,12 +60,25 @@ class SettingsDatabase(ABC):
     def get_schema_scope_that_overrides(self, scope_name: str) -> SCHEMA_SCOPE_TYPE:
         return
 
+    @abstractmethod
+    def register_schema_settings_type(self, settings_type_name: str, settings_type: type) -> bool:
+        return
+
+    @abstractmethod
+    def unregister_schema_settings_type(self, settings_type_name: str) -> bool:
+        return
+
+
+    @abstractmethod
+    def check_schema_settings_type_existence(self, settings_type_name: str) -> bool:
+        return
+
     """
     More complex functions that can be accomplished by manipulating the different operations above
     """
 
     def create_schema_scope(self, scope_name: str, override: SCOPE_TYPE, overridden_by: SCOPE_TYPE,
-                     replace_override=False) -> bool:
+                            replace_override=False) -> bool:
 
         # Check the existence of the scope
         if self.check_schema_scope_existence(scope_name):
@@ -132,8 +145,25 @@ class SettingsDatabase(ABC):
             # Then parent the two remaining ones
             self.parent_schema_scope(scope_that_overrides, scope_overridden_by)
 
-
         # Unregister of the scope
         self.unregister_schema_scope(scope_name)
 
         return True
+
+    def create_schema_settings_type(self, settings_type_name: str, settings_type: type) -> bool:
+
+        # Check existence of schema settings type
+        if self.check_schema_settings_type_existence(settings_type_name):
+            return False
+
+        return self.register_schema_settings_type(settings_type_name, settings_type)
+
+    def delete_schema_settings_type(self, settings_type_name: str) -> bool:
+
+        # Check existence of schema settings type
+        if not self.check_schema_settings_type_existence(settings_type_name):
+            return False
+
+        # TODO: Check if some settings are using this type
+
+        return self.unregister_schema_settings_type(settings_type_name)

@@ -8,7 +8,8 @@ class MockDatabase(SettingsDatabase):
     def __init__(self):
 
         self._data = {}
-        self._scope_hierarchy={}
+        self._scope_hierarchy = {}
+        self._settings_type = {}
 
     def connect(self, identifier: str, password: str) -> bool:
         return True
@@ -75,3 +76,19 @@ class MockDatabase(SettingsDatabase):
     def get_schema_scope_that_overrides(self, scope_name: str) -> SCHEMA_SCOPE_TYPE:
 
         return self._scope_hierarchy.get(scope_name)
+
+    def register_schema_settings_type(self, settings_type_name: str, settings_type: type) -> bool:
+
+        self._settings_type[settings_type_name] = settings_type
+
+        return True
+
+    def unregister_schema_settings_type(self, settings_type_name: str) -> bool:
+
+        del self._settings_type[settings_type_name]
+
+        return True
+
+    def check_schema_settings_type_existence(self, settings_type_name: str) -> bool:
+
+        return settings_type_name in self._settings_type

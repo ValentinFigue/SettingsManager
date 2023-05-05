@@ -11,6 +11,7 @@ from settings_manager.core.settings_script import SettingsScript
 
 SCOPE_TYPE = Union[str, Scope]
 SCHEMA_SCOPE_TYPE = Union[str, SchemaScope]
+SCHEMA_SCOPE_LIST_TYPE = Union[str, SchemaScope, Iterable[Union[SchemaScope, str]], None]
 SCOPE_LIST_TYPE = Union[str, Scope, Iterable[Union[Scope, str]], None]
 SETTINGS_TYPE = Union[str, Settings]
 PERMISSION_GROUP_TYPE = Union[str, PermissionGroup]

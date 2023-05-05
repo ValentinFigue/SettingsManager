@@ -25,7 +25,7 @@ class SettingsDatabaseAPI:
                 value = self._database.create_settings(entity_name, entity_value=extra_fields['entity_value'],
                                                        scope=extra_fields['scope'])
             else:
-                raise ValueError('Entity value and scope inputs must be sets')
+                raise ValueError('Entity value and scope inputs must be set')
         elif entity_type is SchemaScope:
             if 'override' in extra_fields and 'overridden_by' in extra_fields and 'replace_override' in extra_fields:
                 value = self._database.create_schema_scope(entity_name,
@@ -33,7 +33,13 @@ class SettingsDatabaseAPI:
                                                            overridden_by=extra_fields['overridden_by'],
                                                            replace_override=extra_fields['replace_override'])
             else:
-                raise ValueError('overriden_scopes input must be sets')
+                raise ValueError('overriden_scopes input must be set')
+        elif entity_type is SchemaSettingsType:
+            if 'settings_type' in extra_fields:
+                value = self._database.create_schema_settings_type(entity_name,
+                                                                   settings_type=extra_fields['settings_type'])
+            else:
+                raise ValueError('settings_type input must be set')
 
         return value
 
@@ -50,5 +56,7 @@ class SettingsDatabaseAPI:
             value = self._database.delete_settings(entity_name, **filters)
         elif entity_type is SchemaScope:
             value = self._database.delete_schema_scope(entity_name)
+        elif entity_type is SchemaSettingsType:
+            value = self._database.delete_schema_settings_type(entity_name)
 
         return value

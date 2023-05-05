@@ -43,4 +43,15 @@ def test_api_schema_modifications_scope(settings_mock_database):
     assert (settings_manager_api.delete_scope_from_database('Sequence'))
     assert (settings_mock_database.get_schema_scope_overridden_by('Shot') == 'Project')
 
+def test_api_schema_modifications_settings_type(settings_mock_database):
+    settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
+    # Settings Type Creation
+    assert (settings_manager_api.add_schema_settings_type_to_database('Int', int))
+    assert (settings_manager_api.add_schema_settings_type_to_database('Float', float))
+    assert (settings_mock_database.check_schema_settings_type_existence('Float'))
+    assert (not settings_mock_database.check_schema_settings_type_existence('float'))
+    # Settings Type Deletion
+    assert (settings_manager_api.delete_schema_settings_type_from_database('Int'))
+    assert (not settings_mock_database.check_schema_settings_type_existence('Int'))
+
 

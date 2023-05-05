@@ -1,10 +1,12 @@
+from typing import Iterable
+
 # Internal import
 from settings_manager.core.permission_group import PermissionGroup
 from settings_manager.core.schema_settings_type import SchemaSettingsType
 from settings_manager.core.settings import Settings
 from settings_manager.core.settings_user import SettingsUser
-from settings_manager.core.scope import Scope
 from settings_manager.core.schema_scope import SchemaScope
+from settings_manager.core.schema_settings import SchemaSettings
 
 from settings_manager.database.settings_database_api import SettingsDatabaseAPI
 from settings_manager.database.settings_database_api import SettingsDatabase
@@ -19,6 +21,7 @@ from settings_manager.constants.typing import SCRIPT_LIST_TYPE
 from settings_manager.constants.typing import USER_TYPE
 from settings_manager.constants.typing import SCRIPT_TYPE
 from settings_manager.constants.typing import PERMISSION_GROUP_TYPE
+from settings_manager.constants.typing import SCHEMA_SCOPE_LIST_TYPE
 
 
 class SettingsManagerAPI:
@@ -91,9 +94,36 @@ class SettingsManagerAPI:
 
         return status
 
-    def add_settings_to_database(self, settings_name: str, settings_type: SchemaSettingsType, scopes: SCOPE_LIST_TYPE = None,
-                                 permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> Settings:
-        return Settings()
+    def add_schema_settings_type_to_database(self, schema_settings_name: str, schema_settings_type: type) -> bool:
+
+        status = self._database_api.create(SchemaSettingsType,
+                                           schema_settings_name,
+                                           settings_type=schema_settings_type)
+
+        return status
+
+    def delete_schema_settings_type_from_database(self, schema_settings_name: str) -> bool:
+
+        status = self._database_api.delete(SchemaSettingsType,
+                                           schema_settings_name)
+
+        return status
+
+    def add_settings_to_database(self, settings_name: str,
+                                 schema_settings_type: SchemaSettingsType,
+                                 scopes: SCHEMA_SCOPE_LIST_TYPE = None,
+                                 permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> bool:
+
+        # Convert to string scope inputs
+        scopes = self.convert_scopes_to_string_list(scopes)
+
+        status = self._database_api.create(SchemaSettings,
+                                           settings_name,
+                                           schema_settings_type=SchemaSettingsType,
+                                           schema_scopes=scopes,
+                                           permissions_groups=permissions_groups)
+
+        return status
 
     def update_settings_from_database(self, settings_name: str, settings_type: SchemaSettingsType, scopes: SCOPE_LIST_TYPE = None,
                                       permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> bool:
@@ -130,3 +160,15 @@ class SettingsManagerAPI:
         if isinstance(scope, SchemaScope):
             scope = str(scope)
         return scope
+
+    @staticmethod
+    def convert_scopes_to_string_list(scopes: SCHEMA_SCOPE_LIST_TYPE) -> Iterable[str]:
+        converted_scopes = []
+        if scopes:
+            if isinstance(scopes, (SchemaScope, str)):
+                converted_scopes.append(str(SchemaScope))
+            else:
+                for scope in scopes:
+                    converted_scopes.append(str(scope))
+
+        return converted_scopes
