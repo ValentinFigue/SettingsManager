@@ -23,11 +23,13 @@ class SettingsDatabaseAPI:
     def create(self, entity_type, entity_name, **extra_fields):
 
         if entity_type is Settings:
-            if 'scope' in extra_fields and 'entity_value' in extra_fields:
-                value = self._database.create_settings(entity_name, entity_value=extra_fields['entity_value'],
-                                                       scope=extra_fields['scope'])
+            if 'scope_name' in extra_fields and 'settings_value' in extra_fields and 'schema_scope' in extra_fields:
+                value = self._database.create_settings(entity_name,
+                                                       settings_value=extra_fields['settings_value'],
+                                                       scope_name=extra_fields['scope_name'],
+                                                       schema_scope=extra_fields['schema_scope'])
             else:
-                raise ValueError('Entity value and scope inputs must be set')
+                raise ValueError('Scope name, settings value and schema scope  inputs must be set')
         elif entity_type is SchemaScope:
             if 'override' in extra_fields and 'overridden_by' in extra_fields and 'replace_override' in extra_fields:
                 value = self._database.create_schema_scope(entity_name,
@@ -63,12 +65,13 @@ class SettingsDatabaseAPI:
     def update(self, entity_type: object, entity_name: str, **extra_fields):
 
         if entity_type is Settings:
-            if 'entity_value' in extra_fields and 'scope' in extra_fields:
+            if 'scope_name' in extra_fields and 'settings_value' in extra_fields and 'schema_scope' in extra_fields:
                 value = self._database.update_settings(entity_name,
-                                                       entity_value=extra_fields['entity_value'],
-                                                       scope=extra_fields['scope'])
+                                                       settings_value=extra_fields['settings_value'],
+                                                       scope_name=extra_fields['scope_name'],
+                                                       schema_scope=extra_fields['schema_scope'])
             else:
-                raise ValueError('entity_value input must be set')
+                raise ValueError('Scope name, settings value and schema scope  inputs must be set')
         elif entity_type is SchemaSettings:
             if 'schema_settings_type' in extra_fields and 'schema_scopes' in extra_fields \
                     and 'permissions_groups' in extra_fields:
@@ -85,7 +88,12 @@ class SettingsDatabaseAPI:
     def delete(self, entity_type, entity_name, **extra_fields):
 
         if entity_type is Settings:
-            value = self._database.delete_settings(entity_name, **extra_fields)
+            if 'scope_name' in extra_fields and 'schema_scope' in extra_fields:
+                value = self._database.delete_settings(entity_name,
+                                                       scope_name=extra_fields['scope_name'],
+                                                       schema_scope=extra_fields['schema_scope'])
+            else:
+                raise ValueError('Scope name, and schema scope  inputs must be set')
         elif entity_type is SchemaScope:
             value = self._database.delete_schema_scope(entity_name)
         elif entity_type is SchemaSettingsType:

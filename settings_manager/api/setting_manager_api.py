@@ -1,4 +1,5 @@
 from typing import Iterable
+from typing import Any
 
 # Internal import
 from settings_manager.core.permission_group import PermissionGroup
@@ -45,29 +46,47 @@ class SettingsManagerAPI:
     CRUD functions to directly read and update settings data
     """
 
-    def read_settings(self, settings_name: SETTINGS_TYPE, scope: SCOPE_TYPE = None) -> SchemaSettingsType:
+    def read_settings(self, settings_name: SETTINGS_TYPE, **scope_filters) -> Any:
+
+        # Convert all scope filters to string
+        str_scope_filters = {}
+        for key, value in enumerate(scope_filters):
+            str_scope_filters[str(key)] = str(value)
 
         # Read value from settings database via database api
-        value = self._database_api.read(Settings, str(settings_name), scope=scope)
+        value = self._database_api.read(Settings, str(settings_name), **str_scope_filters)
 
         return value
 
-    def update_settings(self, settings: SETTINGS_TYPE, value: SchemaSettingsType, scope: SCOPE_TYPE = None) -> bool:
-
-        # Update value from settings database via database api
-        status = self._database_api.update(Settings, str(settings), entity_value=value, scope=scope)
-
-        return status
-
-    def delete_settings(self, settings: SETTINGS_TYPE, scope: SCOPE_TYPE = None) -> bool:
-
-        status = self._database_api.delete(Settings, str(settings), scope=scope)
+    def update_settings(self, settings_name: str,  settings_value: Any,  scope_name: SCOPE_TYPE,
+                        schema_scope: SCHEMA_SCOPE_TYPE) -> bool:
+        # Convert inputs to string
+        scope_name = str(scope_name)
+        schema_scope = str(schema_scope)
+        # Call database API
+        status = self._database_api.update(Settings, settings_name, settings_value=settings_value,
+                                           scope_name=scope_name, schema_scope=schema_scope)
 
         return status
 
-    def create_settings(self, settings: SETTINGS_TYPE, value: SchemaSettingsType, scope: SCOPE_TYPE = None) -> bool:
+    def delete_settings(self, settings_name: str, scope_name: SCOPE_TYPE,
+                        schema_scope: SCHEMA_SCOPE_TYPE) -> bool:
+        # Convert inputs to string
+        scope_name = str(scope_name)
+        schema_scope = str(schema_scope)
+        # Call database API
+        status = self._database_api.delete(Settings, settings_name, scope_name=scope_name, schema_scope=schema_scope)
 
-        status = self._database_api.create(Settings, str(settings), entity_value=value, scope=scope)
+        return status
+
+    def create_settings(self, settings_name: str,  settings_value: Any,  scope_name: SCOPE_TYPE,
+                        schema_scope: SCHEMA_SCOPE_TYPE) -> bool:
+        # Convert inputs to string
+        scope_name = str(scope_name)
+        schema_scope = str(schema_scope)
+        # Call database API
+        status = self._database_api.create(Settings, settings_name, settings_value=settings_value,
+                                           scope_name=scope_name, schema_scope=schema_scope)
 
         return status
 
@@ -175,25 +194,46 @@ class SettingsManagerAPI:
 
     def add_permission_group_to_database(self, permission_group_name: str, users: USER_LIST_TYPE = None,
                              scripts: SCRIPT_LIST_TYPE = None) -> PermissionGroup:
+
+        # TODO: Fill this one
+
         return PermissionGroup(permission_group_name, users, scripts)
 
     def update_permission_group_from_database(self, permission_group_name: str, users: USER_LIST_TYPE = None,
                                 scripts: SCRIPT_LIST_TYPE = None) -> bool:
+
+        # TODO: Fill this one
+
         return True
 
     def delete_permission_group_from_database(self, permission_group_name: str) -> bool:
+
+        # TODO: Fill this one
+
         return True
 
     def add_user_to_database(self, user_name: str, permission_group: PERMISSION_GROUP_TYPE = None) -> SettingsUser:
+
+        # TODO: Fill this one
+
         return SettingsUser(user_name)
 
     def delete_user_from_database(self, user_name: USER_TYPE) -> bool:
+
+        # TODO: Fill this one
+
         return True
 
     def add_script_to_database(self, script_name: str, permission_group: PERMISSION_GROUP_TYPE = None):
+
+        # TODO: Fill this one
+
         return True
 
     def delete_script_from_database(self, script_name: SCRIPT_TYPE) -> bool:
+
+        # TODO: Fill this one
+
         return True
 
     @staticmethod

@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from settings_manager.core.schema_settings_type import SchemaSettingsType
 from settings_manager.constants.typing import SCOPE_TYPE
 from settings_manager.constants.typing import SCHEMA_SCOPE_TYPE
 from settings_manager.constants.typing import STRING_LIST_TYPE
+from settings_manager.constants.typing import SCHEMA_SCOPE_LIST_TYPE
 
 class SettingsDatabase(ABC):
 
@@ -17,19 +19,27 @@ class SettingsDatabase(ABC):
         return True
 
     @abstractmethod
-    def read_settings(self, settings_name: str, scope: SCOPE_TYPE) -> SchemaSettingsType:
+    def get_settings(self, settings_name: str, scope: str, schema_scope: str) -> Any:
         return
 
     @abstractmethod
-    def create_settings(self, settings_name: str, entity_value: SchemaSettingsType, scope: SCOPE_TYPE) -> bool:
+    def set_settings(self, settings_name: str, entity_value: Any, scope: str, schema_scope: str) -> bool:
         return
 
     @abstractmethod
-    def update_settings(self, settings_name: str, entity_value: SchemaSettingsType, scope: SCOPE_TYPE) -> bool:
+    def register_settings(self, settings_name: str, entity_value: Any, scope: str, schema_scope: str) -> bool:
         return
 
     @abstractmethod
-    def delete_settings(self, settings_name: str, scope: SCOPE_TYPE) -> bool:
+    def register_settings(self, settings_name: str, entity_value: Any, scope: str, schema_scope: str) -> bool:
+        return
+
+    @abstractmethod
+    def unregister_settings(self, settings_name: str, scope: str, schema_scope: str) -> bool:
+        return
+
+    @abstractmethod
+    def check_settings_existence(self, settings_name: str, scope_name: str, schema_scope: str) -> bool:
         return
 
     @abstractmethod
@@ -68,7 +78,6 @@ class SettingsDatabase(ABC):
     def unregister_schema_settings_type(self, settings_type_name: str) -> bool:
         return
 
-
     @abstractmethod
     def check_schema_settings_type_existence(self, settings_type_name: str) -> bool:
         return
@@ -83,8 +92,8 @@ class SettingsDatabase(ABC):
         return
 
     @abstractmethod
-    def reset_schema_settings(self, settings_name: str, schema_settings_type: str,
-                               schema_scopes:  STRING_LIST_TYPE, permissions_groups:  STRING_LIST_TYPE) -> bool:
+    def set_schema_settings(self, settings_name: str, schema_settings_type: str,
+                            schema_scopes:  STRING_LIST_TYPE, permissions_groups:  STRING_LIST_TYPE) -> bool:
         return
 
     @abstractmethod
@@ -102,6 +111,15 @@ class SettingsDatabase(ABC):
     @abstractmethod
     def unregister_scope(self, scope_name: str, schema_scope_name: str) -> bool:
         return
+
+    @abstractmethod
+    def get_settings_type(self, settings_name: str) -> type:
+        return
+
+    @abstractmethod
+    def get_settings_scope(self, settings_name: str) -> SCHEMA_SCOPE_LIST_TYPE:
+        return
+
 
     """
     More complex functions that can be accomplished by manipulating the different operations above
@@ -245,7 +263,7 @@ class SettingsDatabase(ABC):
                 return False
 
         # TODO: Do the same with the permissions
-        self.reset_schema_settings(settings_name, schema_settings_type, schema_scopes, permissions_groups)
+        self.set_schema_settings(settings_name, schema_settings_type, schema_scopes, permissions_groups)
 
         return True
 
@@ -276,3 +294,140 @@ class SettingsDatabase(ABC):
         self.unregister_scope(scope_name, schema_scope)
 
         return True
+
+    def create_settings(self, settings_name: str, settings_value: Any, scope_name: str, schema_scope: str) -> bool:
+
+        # Check existence of the schema scope
+        if not self.check_schema_scope_existence(schema_scope):
+            return False
+
+        # Check existence of the scope
+        if not self.check_scope_existence(scope_name, schema_scope):
+            return False
+
+        # Check existence of the settings name
+        self.check_schema_settings_existence(settings_name)
+
+        # Get type of the settings_name
+        settings_type = self.get_settings_type(settings_name)
+        # Check that the settings value to fill is conform to the settings type
+        if not isinstance(settings_value, settings_type):
+            return False
+
+        # Check that the scope is compatible
+        settings_scopes = self.get_settings_scope(settings_name)
+        if schema_scope not in settings_scopes:
+            return False
+
+        # Check that the settings does not exist
+        if self.check_settings_existence(settings_name, scope_name, schema_scope):
+            return False
+
+        self.register_settings(settings_name, settings_value, scope_name, schema_scope)
+
+        return True
+
+    def delete_settings(self, settings_name: str, scope_name: str, schema_scope: str) -> bool:
+
+        # Check existence of the schema scope
+        if not self.check_schema_scope_existence(schema_scope):
+            return False
+
+        # Check existence of the scope
+        if not self.check_scope_existence(scope_name, schema_scope):
+            return False
+
+        # Check existence of the settings name
+        self.check_schema_settings_existence(settings_name)
+
+        # Check that the scope is compatible
+        settings_scopes = self.get_settings_scope(settings_name)
+        if schema_scope not in settings_scopes:
+            return False
+
+        # Check that the settings does not exist
+        if not self.check_settings_existence(settings_name, scope_name, schema_scope):
+            return True
+
+        self.unregister_settings(settings_name, scope_name, schema_scope)
+
+        return True
+
+    def update_settings(self, settings_name: str, settings_value: Any, scope_name: str, schema_scope: str) -> bool:
+
+        # Check existence of the schema scope
+        if not self.check_schema_scope_existence(schema_scope):
+            return False
+
+        # Check existence of the scope
+        if not self.check_scope_existence(scope_name, schema_scope):
+            return False
+
+        # Check existence of the settings name
+        self.check_schema_settings_existence(settings_name)
+
+        # Check that the scope is compatible
+        settings_scopes = self.get_settings_scope(settings_name)
+        if schema_scope not in settings_scopes:
+            return False
+
+        # Get type of the settings_name
+        settings_type = self.get_settings_type(settings_name)
+        # Check that the settings value to fill is conform to the settings type
+        if not isinstance(settings_value, settings_type):
+            return False
+
+        # Check that the settings does not exist
+        if not self.check_settings_existence(settings_name, scope_name, schema_scope):
+            return True
+
+        self.set_settings(settings_name, settings_value, scope_name, schema_scope)
+
+        return True
+
+    def read_settings(self, settings_name: str, **scope_filters) -> Any:
+
+        # Check existence of the scopes provided in the filters and remove the ones that does not exist or not linked
+        # to the settings
+        settings_scopes = self.get_settings_scope(settings_name)
+
+        for scope_schema in scope_filters.keys():
+            if scope_schema not in settings_scopes or not self.check_schema_scope_existence(scope_schema):
+                del scope_filters[scope_schema]
+
+        # Sort the scope schema by override
+        scope_schema_correspondence_by_override_strength = {}
+        scope_schema_correspondence_by_override_weakness = {}
+        scope_schema_filters = scope_filters.keys()
+        for scope in scope_schema_filters:
+            overriden_scope = self.get_schema_scope_overridden_by(scope)
+            if overriden_scope in scope_schema_filters:
+                scope_schema_correspondence_by_override_weakness[overriden_scope] = scope
+            else:
+                scope_schema_correspondence_by_override_weakness[scope] = None
+            scope_that_overrides = self.get_schema_scope_overridden_by(scope)
+            if scope_that_overrides in scope_schema_filters:
+                scope_schema_correspondence_by_override_strength[scope_that_overrides] = scope
+            else:
+                scope_schema_correspondence_by_override_strength[scope] = None
+
+        # Analyse the order
+        highest_scope = [scope_schema for scope_schema in scope_schema_correspondence_by_override_weakness if
+                         scope_schema_correspondence_by_override_weakness[scope_schema] is None]
+        if len(highest_scope) != 1:
+            print('Impossible to find a settings matching those filters')
+            return None
+
+        # Try to get the highest override settings
+        highest_scope_name = highest_scope[0]
+        if self.check_settings_existence(settings_name, highest_scope_name, scope_filters[highest_scope_name]):
+            return self.get_settings(settings_name, highest_scope_name, scope_filters[highest_scope_name])
+        else:
+            # Do recursive search
+            current_schema = highest_scope_name
+            while scope_schema_correspondence_by_override_strength.get(current_schema):
+                if self.check_settings_existence(settings_name, current_schema, scope_filters[current_schema]):
+                    return self.get_settings(settings_name, current_schema, scope_filters[current_schema])
+                current_schema = scope_schema_correspondence_by_override_strength.get(current_schema)
+
+        return None

@@ -18,19 +18,6 @@ def test_api_initialization(settings_mock_database):
     else:
         assert False
 
-
-@pytest.mark.parametrize('settings', ['test_settings', Settings('test_settings')])
-def test_api_read_settings(settings_mock_database, settings):
-    settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
-    assert (settings_manager_api.read_settings(settings) is None)
-    assert (settings_manager_api.update_settings(settings, 8))
-    assert (settings_manager_api.read_settings(settings) == 8)
-    assert (settings_manager_api.update_settings(settings, 4))
-    assert (settings_manager_api.read_settings(settings) == 4)
-    assert (settings_manager_api.delete_settings(settings))
-    assert (settings_manager_api.read_settings(settings) is None)
-
-
 def test_api_schema_modifications_scope(settings_mock_database):
     settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
     # Scope Creation
@@ -89,3 +76,20 @@ def test_api_scope_modifications(settings_mock_database):
     assert (settings_manager_api.delete_scope('test_project', 'Project'))
     assert (not settings_manager_api.delete_scope('test_project', 'Sequence'))
 
+
+def test_api_read_settings(settings_mock_database):
+    settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
+    # Setup Database
+    settings_manager_api.add_schema_scope_to_database('Project')
+    settings_manager_api.add_schema_scope_to_database('Shot', override=SchemaScope('Project'))
+    settings_manager_api.add_schema_scope_to_database('Sequence', override=SchemaScope('Project'), overridden_by='Shot')
+    settings_manager_api.add_schema_settings_type_to_database('Int', int)
+    settings_manager_api.add_schema_settings_type_to_database('Str', str)
+    settings_manager_api.add_schema_settings_to_database('Number', 'Int', [SchemaScope('Project'), 'Sequence', 'Shot'])
+    settings_manager_api.add_schema_settings_to_database('Number', 'Int', [SchemaScope('Project'), 'Shot'])
+    settings_manager_api.create_scope('test_project', 'Project')
+    settings_manager_api.create_scope('test_shot', SchemaScope('Shot'))
+    settings_manager_api.create_scope('test_sequence', SchemaScope('Sequence'))
+    # Create settings
+    assert (settings_manager_api.create_settings('Number', 4, 'Project', 'test_project'))
+    assert (settings_manager_api.create_settings('Number', 8, 'Shot', 'test_shot'))
