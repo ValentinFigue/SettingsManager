@@ -86,10 +86,22 @@ def test_api_read_settings(settings_mock_database):
     settings_manager_api.add_schema_settings_type_to_database('Int', int)
     settings_manager_api.add_schema_settings_type_to_database('Str', str)
     settings_manager_api.add_schema_settings_to_database('Number', 'Int', [SchemaScope('Project'), 'Sequence', 'Shot'])
-    settings_manager_api.add_schema_settings_to_database('Number', 'Int', [SchemaScope('Project'), 'Shot'])
+    settings_manager_api.add_schema_settings_to_database('Name', 'Str', [SchemaScope('Project'), 'Shot'])
     settings_manager_api.create_scope('test_project', 'Project')
     settings_manager_api.create_scope('test_shot', SchemaScope('Shot'))
     settings_manager_api.create_scope('test_sequence', SchemaScope('Sequence'))
     # Create settings
-    assert (settings_manager_api.create_settings('Number', 4, 'Project', 'test_project'))
-    assert (settings_manager_api.create_settings('Number', 8, 'Shot', 'test_shot'))
+    assert (settings_manager_api.create_settings('Number', 4, schema_scope='Project', scope_name='test_project'))
+    assert (settings_manager_api.create_settings('Number', 8, schema_scope='Shot', scope_name='test_shot'))
+    assert (not settings_manager_api.create_settings('Name', 8,  schema_scope='Shot', scope_name='test_shot'))
+    assert (not settings_manager_api.create_settings('Name', 'Valentin', schema_scope='Sequence',
+                                                     scope_name='test_sequence'))
+    # Update settings
+    assert (settings_manager_api.update_settings('Number', 7, schema_scope='Project', scope_name='test_project'))
+    assert (not settings_manager_api.update_settings('Name', 8, schema_scope='Shot', scope_name='test_shot'))
+    assert (not settings_manager_api.update_settings('Name', 'Valentin', schema_scope='Sequence',
+                                                     scope_name='test_sequence'))
+    # Read settings
+    print(settings_manager_api.read_settings('Number', Project='test_project'))
+    assert (settings_manager_api.read_settings('Number', Project='test_project') == 4)
+    # Delete settings

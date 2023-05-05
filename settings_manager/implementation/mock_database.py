@@ -117,9 +117,9 @@ class MockDatabase(SettingsDatabase):
                                  permissions_groups:  STRING_LIST_TYPE) -> bool:
 
         self._settings_schema[settings_name] = {}
-        self._settings_schema['type'] = schema_settings_type
-        self._settings_schema['scopes'] = schema_scopes
-        self._settings_schema['permissions'] = permissions_groups
+        self._settings_schema[settings_name]['type'] = schema_settings_type
+        self._settings_schema[settings_name]['scopes'] = schema_scopes
+        self._settings_schema[settings_name]['permissions'] = permissions_groups
 
         return True
 

@@ -391,7 +391,7 @@ class SettingsDatabase(ABC):
         # to the settings
         settings_scopes = self.get_settings_scope(settings_name)
 
-        for scope_schema in scope_filters.keys():
+        for scope_schema in scope_filters.copy().keys():
             if scope_schema not in settings_scopes or not self.check_schema_scope_existence(scope_schema):
                 del scope_filters[scope_schema]
 
