@@ -70,6 +70,10 @@ class SettingsManagerAPI:
 
     def add_scope_to_database(self, scope_name: str, overridden_scopes: SCOPE_LIST_TYPE = None) -> bool:
 
+        # Convert scopes to override to string only
+        if overridden_scopes and not isinstance(overridden_scopes, (str, Scope)):
+            overridden_scopes = [str(overridden_scope) for overridden_scope in overridden_scopes]
+
         status = self._database_api.create(Scope, str(scope_name), overridden_scopes=overridden_scopes)
 
         return status

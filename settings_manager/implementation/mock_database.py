@@ -34,11 +34,15 @@ class MockDatabase(SettingsDatabase):
 
         return True
 
-    def create_scope(self, scope_name: str, overridden_scopes: SCOPE_LIST_TYPE) -> bool:
-
+    def register_scope(self, scope_name: str) -> bool:
         self._scope_hierarchy[scope_name] = []
-        if overridden_scopes:
-            for scope in overridden_scopes:
-                self._scope_hierarchy[scope].append(scope)
+        return True
 
+    def check_scope_existence(self, scope_name: str) -> bool:
+        return scope_name in self._scope_hierarchy.keys()
+
+    def parent_scope(self, scope_name: str, overridden_scope: str) -> bool:
+
+        if not scope_name in self._scope_hierarchy[overridden_scope]:
+            self._scope_hierarchy[overridden_scope].append(scope_name)
         return True
