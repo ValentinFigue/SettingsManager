@@ -6,11 +6,15 @@ from settings_manager.core.permission_group import PermissionGroup
 from settings_manager.core.settings import Settings
 from settings_manager.core.settings_user import SettingsUser
 from settings_manager.core.settings_script import SettingsScript
+from settings_manager.core.schema_settings_type import SchemaSettingsType
+from settings_manager.core.schema_settings import SchemaSettings
 
 ### Definition of the main scope
-
+STRING_LIST_TYPE = Union[str, Iterable[str], None]
 SCOPE_TYPE = Union[str, Scope]
+SCHEMA_SETTINGSTYPE_TYPE = Union[str, SchemaSettingsType]
 SCHEMA_SCOPE_TYPE = Union[str, SchemaScope]
+SCHEMA_SETTINGS_TYPE = Union[str, SchemaSettings]
 SCHEMA_SCOPE_LIST_TYPE = Union[str, SchemaScope, Iterable[Union[SchemaScope, str]], None]
 SCOPE_LIST_TYPE = Union[str, Scope, Iterable[Union[Scope, str]], None]
 SETTINGS_TYPE = Union[str, Settings]

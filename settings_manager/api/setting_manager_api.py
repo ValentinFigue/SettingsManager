@@ -22,7 +22,8 @@ from settings_manager.constants.typing import USER_TYPE
 from settings_manager.constants.typing import SCRIPT_TYPE
 from settings_manager.constants.typing import PERMISSION_GROUP_TYPE
 from settings_manager.constants.typing import SCHEMA_SCOPE_LIST_TYPE
-
+from settings_manager.constants.typing import SCHEMA_SETTINGSTYPE_TYPE
+from settings_manager.constants.typing import SCHEMA_SETTINGS_TYPE
 
 class SettingsManagerAPI:
     def __init__(self, settings_database: SettingsDatabase, username: str = None, script_name: str = None,
@@ -53,7 +54,7 @@ class SettingsManagerAPI:
     def update_settings(self, settings: SETTINGS_TYPE, value: SchemaSettingsType, scope: SCOPE_TYPE = None) -> bool:
 
         # Update value from settings database via database api
-        status = self._database_api.update(Settings, str(settings), value, scope=scope)
+        status = self._database_api.update(Settings, str(settings), entity_value=value, scope=scope)
 
         return status
 
@@ -73,8 +74,8 @@ class SettingsManagerAPI:
     CRUD functions to directly update settings database schema
     """
 
-    def add_scope_to_database(self, scope_name: str, override: SCHEMA_SCOPE_TYPE = None,
-                              overridden_by: SCHEMA_SCOPE_TYPE = None, replace_override: bool = False) -> bool:
+    def add_schema_scope_to_database(self, scope_name: str, override: SCHEMA_SCOPE_TYPE = None,
+                                     overridden_by: SCHEMA_SCOPE_TYPE = None, replace_override: bool = False) -> bool:
 
         # Convert to string scope inputs
         scope_name = self.convert_scope_to_string(scope_name)
@@ -86,7 +87,7 @@ class SettingsManagerAPI:
 
         return status
 
-    def delete_scope_from_database(self, scope_name: SCHEMA_SCOPE_TYPE) -> bool:
+    def delete_schema_scope_from_database(self, scope_name: SCHEMA_SCOPE_TYPE) -> bool:
 
         # Convert to string scope inputs
         scope_name = self.convert_scope_to_string(scope_name)
@@ -109,28 +110,49 @@ class SettingsManagerAPI:
 
         return status
 
-    def add_settings_to_database(self, settings_name: str,
-                                 schema_settings_type: SchemaSettingsType,
-                                 scopes: SCHEMA_SCOPE_LIST_TYPE = None,
-                                 permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> bool:
+    def add_schema_settings_to_database(self, settings_name: str,
+                                        schema_settings_type: SCHEMA_SETTINGSTYPE_TYPE,
+                                        scopes: SCHEMA_SCOPE_LIST_TYPE = None,
+                                        permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> bool:
 
         # Convert to string scope inputs
         scopes = self.convert_scopes_to_string_list(scopes)
-
+        schema_settings_type = str(schema_settings_type)
+        # Call database API
         status = self._database_api.create(SchemaSettings,
                                            settings_name,
-                                           schema_settings_type=SchemaSettingsType,
+                                           schema_settings_type=schema_settings_type,
                                            schema_scopes=scopes,
                                            permissions_groups=permissions_groups)
 
         return status
 
-    def update_settings_from_database(self, settings_name: str, settings_type: SchemaSettingsType, scopes: SCOPE_LIST_TYPE = None,
-                                      permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> bool:
-        return True
+    def update_schema_settings_from_database(self, settings_name: SCHEMA_SETTINGS_TYPE,
+                                             schema_settings_type: SCHEMA_SETTINGSTYPE_TYPE,
+                                             scopes: SCHEMA_SCOPE_LIST_TYPE = None,
+                                             permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> bool:
 
-    def delete_settings_from_database(self, settings_name: SETTINGS_TYPE) -> bool:
-        return True
+        # Convert to string scope inputs
+        scopes = self.convert_scopes_to_string_list(scopes)
+        settings_name = str(settings_name)
+        schema_settings_type = str(schema_settings_type)
+        # Call database API
+        status = self._database_api.update(SchemaSettings,
+                                           settings_name,
+                                           schema_settings_type=schema_settings_type,
+                                           schema_scopes=scopes,
+                                           permissions_groups=permissions_groups)
+
+        return status
+
+    def delete_schema_settings_from_database(self, settings_name: SCHEMA_SETTINGS_TYPE) -> bool:
+
+        # Convert to string scope inputs
+        settings_name = str(settings_name)
+        # Call database API
+        status = self._database_api.delete(SchemaSettings, settings_name)
+
+        return status
 
     def add_permission_group_to_database(self, permission_group_name: str, users: USER_LIST_TYPE = None,
                              scripts: SCRIPT_LIST_TYPE = None) -> PermissionGroup:
@@ -166,7 +188,7 @@ class SettingsManagerAPI:
         converted_scopes = []
         if scopes:
             if isinstance(scopes, (SchemaScope, str)):
-                converted_scopes.append(str(SchemaScope))
+                converted_scopes.append(str(scopes))
             else:
                 for scope in scopes:
                     converted_scopes.append(str(scope))

@@ -34,13 +34,13 @@ def test_api_read_settings(settings_mock_database, settings):
 def test_api_schema_modifications_scope(settings_mock_database):
     settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
     # Scope Creation
-    assert (settings_manager_api.add_scope_to_database('Project'))
-    assert (settings_manager_api.add_scope_to_database('Shot', override=SchemaScope('Project')))
-    assert (settings_manager_api.add_scope_to_database('Sequence', override=SchemaScope('Project'), overridden_by='Shot'))
+    assert (settings_manager_api.add_schema_scope_to_database('Project'))
+    assert (settings_manager_api.add_schema_scope_to_database('Shot', override=SchemaScope('Project')))
+    assert (settings_manager_api.add_schema_scope_to_database('Sequence', override=SchemaScope('Project'), overridden_by='Shot'))
     assert (settings_mock_database.get_schema_scope_overridden_by('Sequence') == 'Project')
     assert (settings_mock_database.get_schema_scope_overridden_by('Shot') == 'Sequence')
     # Scope Deletion
-    assert (settings_manager_api.delete_scope_from_database('Sequence'))
+    assert (settings_manager_api.delete_schema_scope_from_database('Sequence'))
     assert (settings_mock_database.get_schema_scope_overridden_by('Shot') == 'Project')
 
 def test_api_schema_modifications_settings_type(settings_mock_database):
@@ -53,5 +53,23 @@ def test_api_schema_modifications_settings_type(settings_mock_database):
     # Settings Type Deletion
     assert (settings_manager_api.delete_schema_settings_type_from_database('Int'))
     assert (not settings_mock_database.check_schema_settings_type_existence('Int'))
+
+def test_api_schema_modifications_settings(settings_mock_database):
+    settings_manager_api = SettingsManagerAPI(settings_mock_database, username='user_a', user_password='481')
+    # Setup Database
+    settings_manager_api.add_schema_settings_type_to_database('Int', int)
+    settings_manager_api.add_schema_settings_type_to_database('Str', str)
+    settings_manager_api.add_schema_scope_to_database('Project')
+    settings_manager_api.add_schema_scope_to_database('Shot', override=SchemaScope('Project'))
+    settings_manager_api.add_schema_scope_to_database('Sequence', override=SchemaScope('Project'), overridden_by='Shot')
+    # Settings Creation
+    assert (settings_manager_api.add_schema_settings_to_database('Number', 'Int', [SchemaScope('Project'), 'Shot']))
+    assert (settings_manager_api.add_schema_settings_to_database('Name', 'Str'))
+    assert (not settings_manager_api.add_schema_settings_to_database('Name', 'Unknown'))
+    # Settings Update
+    assert (settings_manager_api.update_schema_settings_from_database('Name', 'Str', SchemaScope('Shot')))
+    # Settings Deletion
+    assert (settings_manager_api.delete_schema_settings_from_database('Name'))
+    assert (not settings_mock_database.check_schema_settings_existence('Name'))
 
 

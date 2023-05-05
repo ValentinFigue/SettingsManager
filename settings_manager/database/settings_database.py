@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
 from settings_manager.core.schema_settings_type import SchemaSettingsType
-from settings_manager.core.scope import Scope
 from settings_manager.constants.typing import SCOPE_TYPE
 from settings_manager.constants.typing import SCHEMA_SCOPE_TYPE
+from settings_manager.constants.typing import STRING_LIST_TYPE
 
 class SettingsDatabase(ABC):
 
@@ -73,6 +73,25 @@ class SettingsDatabase(ABC):
     def check_schema_settings_type_existence(self, settings_type_name: str) -> bool:
         return
 
+    @abstractmethod
+    def register_schema_settings(self, settings_name: str, schema_settings_type: str,
+                                 schema_scopes:  STRING_LIST_TYPE, permissions_groups:  STRING_LIST_TYPE) -> bool:
+        return
+
+    @abstractmethod
+    def unregister_schema_settings(self, settings_name: str) -> bool:
+        return
+
+    @abstractmethod
+    def reset_schema_settings(self, settings_name: str, schema_settings_type: str,
+                               schema_scopes:  STRING_LIST_TYPE, permissions_groups:  STRING_LIST_TYPE) -> bool:
+        return
+
+    @abstractmethod
+    def check_schema_settings_existence(self, settings_name: str) -> bool:
+        return
+
+
     """
     More complex functions that can be accomplished by manipulating the different operations above
     """
@@ -90,13 +109,10 @@ class SettingsDatabase(ABC):
         # Definition of the new overriden chain
         # In case we need to define a new scope that overrides
         if override is not None:
-            print(type(override))
             # Get the scope that already overrides
             scope_already_overriding = self.get_schema_scope_that_overrides(override)
-            print(override)
             # Easy case
             if not scope_already_overriding:
-                print(override)
                 self.parent_schema_scope(scope_name, override)
             # Check if it's the one that will override our new scope
             elif scope_already_overriding == overridden_by:
@@ -167,3 +183,57 @@ class SettingsDatabase(ABC):
         # TODO: Check if some settings are using this type
 
         return self.unregister_schema_settings_type(settings_type_name)
+
+    def create_schema_settings(self, settings_name: str, schema_settings_type: str,
+                               schema_scopes:  STRING_LIST_TYPE, permissions_groups:  STRING_LIST_TYPE) -> bool:
+
+        # Check existence of the schema settings
+        if self.check_schema_settings_existence(settings_name):
+            return False
+
+        # Check that settings type exists
+        if not self.check_schema_settings_type_existence(schema_settings_type):
+            return False
+
+        # Check that all scopes exist
+        for scope in schema_scopes:
+            if not self.check_schema_scope_existence(scope):
+                return False
+
+        # TODO: Do the same with the permissions
+        self.register_schema_settings(settings_name, schema_settings_type, schema_scopes, permissions_groups)
+
+        return True
+
+    def delete_schema_settings(self, settings_name: str) -> bool:
+
+        # Check existence of the schema settings
+        if not self.check_schema_settings_existence(settings_name):
+            return False
+
+        # TODO: Check that no settings are depending from this schema
+
+        self.unregister_schema_settings(settings_name)
+
+        return True
+
+    def update_schema_settings(self, settings_name: str, schema_settings_type: str,
+                               schema_scopes: STRING_LIST_TYPE, permissions_groups: STRING_LIST_TYPE) -> bool:
+
+        # Check existence of the schema settings
+        if not self.check_schema_settings_existence(settings_name):
+            return False
+
+        # Check that settings type exists
+        if not self.check_schema_settings_type_existence(schema_settings_type):
+            return False
+
+        # Check that all scopes exist
+        for scope in schema_scopes:
+            if not self.check_schema_scope_existence(scope):
+                return False
+
+        # TODO: Do the same with the permissions
+        self.reset_schema_settings(settings_name, schema_settings_type, schema_scopes, permissions_groups)
+
+        return True

@@ -1,7 +1,7 @@
 from settings_manager.database.settings_database import SettingsDatabase
 from settings_manager.core.schema_settings_type import SchemaSettingsType
 from settings_manager.constants.typing import SCHEMA_SCOPE_TYPE
-
+from settings_manager.constants.typing import STRING_LIST_TYPE
 
 class MockDatabase(SettingsDatabase):
 
@@ -10,6 +10,7 @@ class MockDatabase(SettingsDatabase):
         self._data = {}
         self._scope_hierarchy = {}
         self._settings_type = {}
+        self._settings_schema = {}
 
     def connect(self, identifier: str, password: str) -> bool:
         return True
@@ -92,3 +93,35 @@ class MockDatabase(SettingsDatabase):
     def check_schema_settings_type_existence(self, settings_type_name: str) -> bool:
 
         return settings_type_name in self._settings_type
+
+    def check_schema_settings_existence(self, settings_name: str) -> bool:
+
+        return settings_name in self._settings_schema
+
+    def register_schema_settings(self, settings_name: str, schema_settings_type: str,
+                                 schema_scopes:  STRING_LIST_TYPE,
+                                 permissions_groups:  STRING_LIST_TYPE) -> bool:
+
+        self._settings_schema[settings_name] = {}
+        self._settings_schema['type'] = schema_settings_type
+        self._settings_schema['scopes'] = schema_scopes
+        self._settings_schema['permissions'] = permissions_groups
+
+        return True
+
+    def unregister_schema_settings(self, settings_name: str) -> bool:
+
+        del self._settings_schema[settings_name]
+
+        return True
+
+    def reset_schema_settings(self, settings_name: str, schema_settings_type: str,
+                              schema_scopes:  STRING_LIST_TYPE,
+                              permissions_groups:  STRING_LIST_TYPE) -> bool:
+
+        self._settings_schema[settings_name] = {}
+        self._settings_schema['type'] = schema_settings_type
+        self._settings_schema['scopes'] = schema_scopes
+        self._settings_schema['permissions'] = permissions_groups
+
+        return True

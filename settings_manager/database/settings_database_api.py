@@ -3,6 +3,7 @@ from settings_manager.database.settings_database import SettingsDatabase
 from settings_manager.core.settings import Settings
 from settings_manager.core.schema_scope import SchemaScope
 from settings_manager.core.schema_settings_type import SchemaSettingsType
+from settings_manager.core.schema_settings import SchemaSettings
 
 class SettingsDatabaseAPI:
 
@@ -40,13 +41,38 @@ class SettingsDatabaseAPI:
                                                                    settings_type=extra_fields['settings_type'])
             else:
                 raise ValueError('settings_type input must be set')
+        elif entity_type is SchemaSettings:
+            if 'schema_settings_type' in extra_fields and 'schema_scopes' in extra_fields \
+                    and 'permissions_groups' in extra_fields:
+                value = self._database.create_schema_settings(entity_name,
+                                                              schema_settings_type=extra_fields['schema_settings_type'],
+                                                              schema_scopes=extra_fields['schema_scopes'],
+                                                              permissions_groups=extra_fields['permissions_groups']
+                                                              )
+            else:
+                raise ValueError('settings_type input must be set')
 
         return value
 
-    def update(self, entity_type: object, entity_name: str, entity_value: SchemaSettingsType, **filters):
+    def update(self, entity_type: object, entity_name: str, **extra_fields):
 
         if entity_type is Settings:
-            value = self._database.update_settings(entity_name, entity_value, **filters)
+            if 'entity_value' in extra_fields and 'scope' in extra_fields:
+                value = self._database.update_settings(entity_name,
+                                                       entity_value=extra_fields['entity_value'],
+                                                       scope=extra_fields['scope'])
+            else:
+                raise ValueError('entity_value input must be set')
+        elif entity_type is SchemaSettings:
+            if 'schema_settings_type' in extra_fields and 'schema_scopes' in extra_fields \
+                    and 'permissions_groups' in extra_fields:
+                value = self._database.update_schema_settings(entity_name,
+                                                              schema_settings_type=extra_fields['schema_settings_type'],
+                                                              schema_scopes=extra_fields['schema_scopes'],
+                                                              permissions_groups=extra_fields['permissions_groups']
+                                                              )
+            else:
+                raise ValueError('settings_type input must be set')
 
         return value
 
@@ -58,5 +84,7 @@ class SettingsDatabaseAPI:
             value = self._database.delete_schema_scope(entity_name)
         elif entity_type is SchemaSettingsType:
             value = self._database.delete_schema_settings_type(entity_name)
+        elif entity_type is SchemaSettings:
+            value = self._database.delete_schema_settings(entity_name)
 
         return value
