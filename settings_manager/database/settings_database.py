@@ -395,43 +395,37 @@ class SettingsDatabase(ABC):
             if scope_schema not in settings_scopes or not self.check_schema_scope_existence(scope_schema):
                 del scope_filters[scope_schema]
 
-        # Sort the scope schema by override
-        scope_schema_correspondence_by_override_strength = {}
-        scope_schema_correspondence_by_override_weakness = {}
-        scope_schema_filters = scope_filters.keys()
-        for scope in scope_schema_filters:
-            overriden_scope = self.get_schema_scope_overridden_by(scope)
-            if overriden_scope in scope_schema_filters:
-                scope_schema_correspondence_by_override_weakness[overriden_scope] = scope
-            else:
-                scope_schema_correspondence_by_override_weakness[scope] = None
-            scope_that_overrides = self.get_schema_scope_overridden_by(scope)
-            if scope_that_overrides in scope_schema_filters:
-                scope_schema_correspondence_by_override_strength[scope_that_overrides] = scope
-            else:
-                scope_schema_correspondence_by_override_strength[scope] = None
+        # Reconstruct the chain of dependency
+        # Start from a random scope
+        initial_scope = list(scope_filters.keys())[0]
+        ordered_chain = []
+        ordered_chain.append(initial_scope)
+        # Get lower scopes
+        lower_level_scope = self.get_schema_scope_overridden_by(initial_scope)
+        while lower_level_scope is not None:
+            ordered_chain.append(lower_level_scope)
+            lower_level_scope = self.get_schema_scope_overridden_by(lower_level_scope)
+        # Get higher scopes
+        higher_level_scope = self.get_schema_scope_that_overrides(initial_scope)
+        while higher_level_scope is not None:
+            ordered_chain.insert(0, higher_level_scope)
+            higher_level_scope = self.get_schema_scope_that_overrides(higher_level_scope)
 
-        # Analyse the order
-        highest_scope = [scope_schema for scope_schema in scope_schema_correspondence_by_override_weakness if
-                         scope_schema_correspondence_by_override_weakness[scope_schema] is None]
-        if len(highest_scope) != 1:
-            print('Impossible to find a settings matching those filters')
-            return None
+        # Check that all scopes are in the override chain
+        for scope in scope_filters.keys():
+            if scope not in ordered_chain:
+                print('Impossible to find a settings due to different override chains')
+                return None
+        # Remove from the ordered chain the non matching filters
+        for scope in ordered_chain.copy():
+            if scope not in scope_filters.keys():
+                ordered_chain.remove(scope)
 
         # Try to get the highest override settings
-        highest_scope_name = highest_scope[0]
-        if self.check_settings_existence(settings_name, scope_name=scope_filters[highest_scope_name],
-                                         schema_scope=highest_scope_name):
-            return self.get_settings(settings_name, schema_scope=highest_scope_name,
-                                     scope=scope_filters[highest_scope_name])
-        else:
-            # Do recursive search
-            current_schema = highest_scope_name
-            while scope_schema_correspondence_by_override_strength.get(current_schema):
-                if self.check_settings_existence(settings_name, scope_name=scope_filters[current_schema],
-                                                 schema_scope=current_schema):
-                    return self.get_settings(settings_name, schema_scope=current_schema,
-                                             scope=scope_filters[current_schema])
-                current_schema = scope_schema_correspondence_by_override_strength.get(current_schema)
+        for scope in ordered_chain:
+            if self.check_settings_existence(settings_name, scope_name=scope_filters[scope],
+                                             schema_scope=scope):
+                return self.get_settings(settings_name, schema_scope=scope,
+                                         scope=scope_filters[scope])
 
         return None

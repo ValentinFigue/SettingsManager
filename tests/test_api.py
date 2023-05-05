@@ -104,6 +104,7 @@ def test_api_read_settings(settings_mock_database):
     # Read settings
     assert (settings_manager_api.read_settings('Number', Project='test_project') == 7)
     assert (settings_manager_api.read_settings('Number', Shot='test_shot') == 8)
+    assert (settings_manager_api.read_settings('Number', Shot='test_shot', Project='test_project') == 8)
     assert (settings_manager_api.read_settings('Number', Shot='Unknown') is None)
     # Delete settings
     assert (settings_manager_api.delete_settings('Number', schema_scope='Project', scope_name='test_project'))
