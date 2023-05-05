@@ -1,14 +1,16 @@
 # Internal import
 from settings_manager.core.permission_group import PermissionGroup
-from settings_manager.core.settings_type import SettingsType
+from settings_manager.core.schema_settings_type import SchemaSettingsType
 from settings_manager.core.settings import Settings
 from settings_manager.core.settings_user import SettingsUser
 from settings_manager.core.scope import Scope
+from settings_manager.core.schema_scope import SchemaScope
 
 from settings_manager.database.settings_database_api import SettingsDatabaseAPI
 from settings_manager.database.settings_database_api import SettingsDatabase
 
 from settings_manager.constants.typing import SCOPE_TYPE
+from settings_manager.constants.typing import SCHEMA_SCOPE_TYPE
 from settings_manager.constants.typing import SCOPE_LIST_TYPE
 from settings_manager.constants.typing import SETTINGS_TYPE
 from settings_manager.constants.typing import PERMISSION_GROUP_LIST_TYPE
@@ -38,14 +40,14 @@ class SettingsManagerAPI:
     CRUD functions to directly read and update settings data
     """
 
-    def read_settings(self, settings_name: SETTINGS_TYPE, scope: SCOPE_TYPE = None) -> SettingsType:
+    def read_settings(self, settings_name: SETTINGS_TYPE, scope: SCOPE_TYPE = None) -> SchemaSettingsType:
 
         # Read value from settings database via database api
         value = self._database_api.read(Settings, str(settings_name), scope=scope)
 
         return value
 
-    def update_settings(self, settings: SETTINGS_TYPE, value: SettingsType, scope: SCOPE_TYPE = None) -> bool:
+    def update_settings(self, settings: SETTINGS_TYPE, value: SchemaSettingsType, scope: SCOPE_TYPE = None) -> bool:
 
         # Update value from settings database via database api
         status = self._database_api.update(Settings, str(settings), value, scope=scope)
@@ -58,9 +60,9 @@ class SettingsManagerAPI:
 
         return status
 
-    def create_settings(self, settings: SETTINGS_TYPE, value: SettingsType, scope: SCOPE_TYPE = None) -> bool:
+    def create_settings(self, settings: SETTINGS_TYPE, value: SchemaSettingsType, scope: SCOPE_TYPE = None) -> bool:
 
-        status = self._database_api.create(Settings, str(settings), value, scope=scope)
+        status = self._database_api.create(Settings, str(settings), entity_value=value, scope=scope)
 
         return status
 
@@ -68,34 +70,33 @@ class SettingsManagerAPI:
     CRUD functions to directly update settings database schema
     """
 
-    def add_scope_to_database(self, scope_name: SCOPE_TYPE, override: SCOPE_TYPE = None,
-                              overridden_by: SCOPE_TYPE = None, replace_override: bool = False) -> bool:
+    def add_scope_to_database(self, scope_name: str, override: SCHEMA_SCOPE_TYPE = None,
+                              overridden_by: SCHEMA_SCOPE_TYPE = None, replace_override: bool = False) -> bool:
 
         # Convert to string scope inputs
-        if isinstance(scope_name, Scope):
-            scope_name = str(scope_name)
-        if isinstance(override, Scope):
-            override = str(override)
-        if isinstance(overridden_by, Scope):
-            overridden_by = str(overridden_by)
+        scope_name = self.convert_scope_to_string(scope_name)
+        override = self.convert_scope_to_string(override)
+        overridden_by = self.convert_scope_to_string(overridden_by)
 
-        status = self._database_api.create(Scope, scope_name, override=override,
+        status = self._database_api.create(SchemaScope, scope_name, override=override,
                                            overridden_by=overridden_by, replace_override=replace_override)
 
         return status
 
-    def delete_scope_from_database(self, scope_name: SCOPE_TYPE) -> bool:
+    def delete_scope_from_database(self, scope_name: SCHEMA_SCOPE_TYPE) -> bool:
 
-        status = self._database_api.delete(Scope, str(scope_name))
+        # Convert to string scope inputs
+        scope_name = self.convert_scope_to_string(scope_name)
+        status = self._database_api.delete(SchemaScope, str(scope_name))
 
         return status
 
-    def add_settings_to_database(self, settings_name: str, settings_type: SettingsType, scopes: SCOPE_LIST_TYPE = None,
-                     permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> Settings:
+    def add_settings_to_database(self, settings_name: str, settings_type: SchemaSettingsType, scopes: SCOPE_LIST_TYPE = None,
+                                 permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> Settings:
         return Settings()
 
-    def update_settings_from_database(self, settings_name: str, settings_type: SettingsType, scopes: SCOPE_LIST_TYPE = None,
-                        permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> bool:
+    def update_settings_from_database(self, settings_name: str, settings_type: SchemaSettingsType, scopes: SCOPE_LIST_TYPE = None,
+                                      permissions_groups: PERMISSION_GROUP_LIST_TYPE = None) -> bool:
         return True
 
     def delete_settings_from_database(self, settings_name: SETTINGS_TYPE) -> bool:
@@ -123,3 +124,9 @@ class SettingsManagerAPI:
 
     def delete_script_from_database(self, script_name: SCRIPT_TYPE) -> bool:
         return True
+
+    @staticmethod
+    def convert_scope_to_string(scope: SCHEMA_SCOPE_TYPE) -> str:
+        if isinstance(scope, SchemaScope):
+            scope = str(scope)
+        return scope

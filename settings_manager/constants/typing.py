@@ -1,6 +1,7 @@
 from typing import Union, Iterable
 
 from settings_manager.core.scope import Scope
+from settings_manager.core.schema_scope import SchemaScope
 from settings_manager.core.permission_group import PermissionGroup
 from settings_manager.core.settings import Settings
 from settings_manager.core.settings_user import SettingsUser
@@ -9,6 +10,7 @@ from settings_manager.core.settings_script import SettingsScript
 ### Definition of the main scope
 
 SCOPE_TYPE = Union[str, Scope]
+SCHEMA_SCOPE_TYPE = Union[str, SchemaScope]
 SCOPE_LIST_TYPE = Union[str, Scope, Iterable[Union[Scope, str]], None]
 SETTINGS_TYPE = Union[str, Settings]
 PERMISSION_GROUP_TYPE = Union[str, PermissionGroup]

@@ -1,8 +1,8 @@
 from settings_manager.database.settings_database import SettingsDatabase
 
 from settings_manager.core.settings import Settings
-from settings_manager.core.scope import Scope
-
+from settings_manager.core.schema_scope import SchemaScope
+from settings_manager.core.schema_settings_type import SchemaSettingsType
 
 class SettingsDatabaseAPI:
 
@@ -26,18 +26,18 @@ class SettingsDatabaseAPI:
                                                        scope=extra_fields['scope'])
             else:
                 raise ValueError('Entity value and scope inputs must be sets')
-        elif entity_type is Scope:
+        elif entity_type is SchemaScope:
             if 'override' in extra_fields and 'overridden_by' in extra_fields and 'replace_override' in extra_fields:
-                value = self._database.create_scope(entity_name,
-                                                    override=extra_fields['override'],
-                                                    overridden_by=extra_fields['overridden_by'],
-                                                    replace_override=extra_fields['replace_override'])
+                value = self._database.create_schema_scope(entity_name,
+                                                           override=extra_fields['override'],
+                                                           overridden_by=extra_fields['overridden_by'],
+                                                           replace_override=extra_fields['replace_override'])
             else:
                 raise ValueError('overriden_scopes input must be sets')
 
         return value
 
-    def update(self, entity_type, entity_name, entity_value, **filters):
+    def update(self, entity_type: object, entity_name: str, entity_value: SchemaSettingsType, **filters):
 
         if entity_type is Settings:
             value = self._database.update_settings(entity_name, entity_value, **filters)
@@ -48,7 +48,7 @@ class SettingsDatabaseAPI:
 
         if entity_type is Settings:
             value = self._database.delete_settings(entity_name, **filters)
-        elif entity_type is Scope:
-            value = self._database.delete_scope(entity_name)
+        elif entity_type is SchemaScope:
+            value = self._database.delete_schema_scope(entity_name)
 
         return value
