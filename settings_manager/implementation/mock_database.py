@@ -42,6 +42,11 @@ class MockDatabase(SettingsDatabase):
 
     def check_settings_existence(self, settings_name: str, scope_name: str, schema_scope: str) -> bool:
 
+        if schema_scope not in self._data:
+            return False
+        if scope_name not in self._data[schema_scope]:
+            return False
+
         return settings_name in self._data[schema_scope][scope_name]
 
     def register_schema_scope(self, scope_name: str) -> bool:

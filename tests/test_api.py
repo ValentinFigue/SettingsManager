@@ -102,6 +102,9 @@ def test_api_read_settings(settings_mock_database):
     assert (not settings_manager_api.update_settings('Name', 'Valentin', schema_scope='Sequence',
                                                      scope_name='test_sequence'))
     # Read settings
-    print(settings_manager_api.read_settings('Number', Project='test_project'))
-    assert (settings_manager_api.read_settings('Number', Project='test_project') == 4)
+    assert (settings_manager_api.read_settings('Number', Project='test_project') == 7)
+    assert (settings_manager_api.read_settings('Number', Shot='test_shot') == 8)
+    assert (settings_manager_api.read_settings('Number', Shot='Unknown') is None)
     # Delete settings
+    assert (settings_manager_api.delete_settings('Number', schema_scope='Project', scope_name='test_project'))
+    assert (settings_manager_api.read_settings('Number', Project='test_project') is None)

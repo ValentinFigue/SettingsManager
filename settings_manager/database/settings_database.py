@@ -420,14 +420,18 @@ class SettingsDatabase(ABC):
 
         # Try to get the highest override settings
         highest_scope_name = highest_scope[0]
-        if self.check_settings_existence(settings_name, highest_scope_name, scope_filters[highest_scope_name]):
-            return self.get_settings(settings_name, highest_scope_name, scope_filters[highest_scope_name])
+        if self.check_settings_existence(settings_name, scope_name=scope_filters[highest_scope_name],
+                                         schema_scope=highest_scope_name):
+            return self.get_settings(settings_name, schema_scope=highest_scope_name,
+                                     scope=scope_filters[highest_scope_name])
         else:
             # Do recursive search
             current_schema = highest_scope_name
             while scope_schema_correspondence_by_override_strength.get(current_schema):
-                if self.check_settings_existence(settings_name, current_schema, scope_filters[current_schema]):
-                    return self.get_settings(settings_name, current_schema, scope_filters[current_schema])
+                if self.check_settings_existence(settings_name, scope_name=scope_filters[current_schema],
+                                                 schema_scope=current_schema):
+                    return self.get_settings(settings_name, schema_scope=current_schema,
+                                             scope=scope_filters[current_schema])
                 current_schema = scope_schema_correspondence_by_override_strength.get(current_schema)
 
         return None

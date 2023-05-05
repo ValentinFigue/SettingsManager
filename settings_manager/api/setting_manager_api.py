@@ -50,7 +50,7 @@ class SettingsManagerAPI:
 
         # Convert all scope filters to string
         str_scope_filters = {}
-        for key, value in enumerate(scope_filters):
+        for key, value in scope_filters.items():
             str_scope_filters[str(key)] = str(value)
 
         # Read value from settings database via database api
