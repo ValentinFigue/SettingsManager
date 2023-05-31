@@ -2,3 +2,6 @@
 pytest
 codecov
 pytest-cov
+
+# UI requirement
+pyside6
