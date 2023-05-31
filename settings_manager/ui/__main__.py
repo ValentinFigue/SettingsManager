@@ -11,4 +11,4 @@ class MainWindow(QtWidgets.QMainWindow):
 app = QtWidgets.QApplication(sys.argv)
 window = MainWindow()
 window.show()
-app.exec_()
+app.exec()

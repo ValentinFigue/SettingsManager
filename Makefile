@@ -7,3 +7,7 @@ install:
 test:
 	. venv/bin/activate
 	pytest --cov=settings_manager tests
+
+ui:
+	. venv/bin/activate
+	python -m settings_manager.ui
